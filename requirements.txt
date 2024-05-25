@@ -1,0 +1,17 @@
+Flask
+google-auth-oauthlib
+google-auth
+requests
+flask-paginate
+pandas
+scikit-learn
+mysql-connector-python
+pymongo
+sqlalchemy
+numpy
+werkzeug
+flask-session
+Flask-SQLAlchemy
+matplotlib
+seaborn
+openpyxl

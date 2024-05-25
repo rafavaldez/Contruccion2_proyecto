@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Otros elementos head -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Contenido de la página -->
+  
+  <h1>Resultados del Paciente: {{ paciente[0] }}</h1>
+
+  <canvas id="chart"></canvas>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var ctx = document.getElementById('chart').getContext('2d');
+      var labels = [];
+      var data = [];
+      var backgroundColors = [];
+
+      {% for row in resultados %}
+        labels.push('{{ row[0] }} - {{ row[1] }}');
+        data.push({{ row[2] }});
+
+        // Generar color aleatorio para cada barra
+        var randomColor = 'rgba(' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', 0.2)';
+        backgroundColors.push(randomColor);
+      {% endfor %}
+
+      var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Score de Etapa',
+            data: data,
+            backgroundColor: backgroundColors,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          tooltips: {
+            callbacks: {
+              label: function(context) {
+                var label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                label += context.raw.yLabel;
+                return label;
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

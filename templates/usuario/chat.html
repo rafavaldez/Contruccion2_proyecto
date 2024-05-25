@@ -1,0 +1,115 @@
+{% extends "usuario/usuario_layout.html" %}
+
+{% block content %}
+
+<div class="col-lg-12 px-sm-0">
+    <div class="card shadow-none px-0 bg-transparent mt-0 mb-4">
+        <div class="card-body px-0 pb-0">
+            <div class="px-0 pb-4">
+                <div class="row flex-row">
+
+                    <div class="col-lg-8">
+                        <div class="card max-height-vh-70" style="max-height: 70vh;">
+                            <div class="card-header shadow-xl">
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <div class="d-flex align-items-center">
+                                            <div class="ms-3">
+                                                <h3 class="mb-0 d-block">Chat Terapeuta - ChatDoc</h3>
+                                                <span class="text-sm text-muted"><span class="font-weight-bold">Trabajo:
+                                                        Terapeuta</span> | Palmera Clinica</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body overflow-auto overflow-x-hidden" id="chat-go">
+
+                                <div class="row justify-content-start mb-4">
+                                    <div class="col-auto">
+                                        <div class="card ">
+                                            <div class="card-body p-2">
+                                                <p class="mb-1">
+                                                    Hola mi nombre es Joy, soy tu terapeuta virtual, cuentame como te sientes hoy, estoy aquí para ayudarte.. &#128512;
+                                                </p>
+                                                <div class="d-flex align-items-center text-sm opacity-6">
+                                                    <i class="far fa-clock mr-1" aria-hidden="true"></i>
+                                                    <small>3:14am</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer d-block">
+
+                                <div class="input-group mb-3">
+                                    <input type="text" placeholder="Search" class="form-control" id="query-input"
+                                        data-url="{{ url_for('generateResponseChatbot') }}"
+                                        aria-label="Amount (to the nearest dollar)">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">
+                                            <i class="fa fa-paper-plane"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card max-height-vh-70 h-100 overflow-auto overflow-x-hidden mb-5 mb-lg-0"
+                            style="max-height: 70vh;">
+                            <div class="card-body p-2">
+                                <a href="javascript:;" class="d-block p-2">
+                                </a>
+                                <div class="p-2 text-center">
+                                    <a href="javascript:;" class="d-block p-2">
+                                        <img alt="Image" src="https://i.imgur.com/x85Djwt.jpeg"
+                                            class="avatar avatar-lg shadow mb-0">
+                                    </a>
+                                    <div class="ml-2 mt-0 mb-0 text-center">
+                                        <div class="justify-content-between align-items-center">
+                                            <h3 class="mb-0 mt-1">ChatDoc</h3>
+                                            <p class="mb-0 text-sm text-dark font-weight-normal">Clinica Las Palmeras</p>
+                                            <p>modo:{{clasificacion}}</p>
+                                            <a href="" class="text-sm ">Ver perfil</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="my-3">
+                                <div class="mx-3">
+                                    <h4 class="mb-0">Solicitado por</h4>
+                                    <p class="text-sm text-muted font-weight-normal">Trabajo: Terapeuta</p>
+                                </div>
+                                <hr class="my-3">
+                                <div class="mx-3">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="fa fa-envelope opacity-7"></i>
+                                        <div class="ml-3">
+                                            <h5 class="mb-0">Email</h5>
+                                            <span class="text-sm text-primary">laspalmerastacna@gmail.com
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-phone opacity-7"></i>
+                                        <div class="ml-3">
+                                            <h5 class="mb-0">Nro</h5>
+                                            <span class="text-sm text-primary">052-451236
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
