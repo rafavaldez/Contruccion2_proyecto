@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/f72e89ea-cef9-4e19-9d03-dfbd48f81c2c/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/FlaskAnomalias",
+    "appService.deploySubpath": "."
+}

@@ -74,9 +74,25 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = 'AppTransf/session_data'  # Ruta relativa a la carpeta 'AppTransf'.
 Session(app)
 
+@app.route('/admin/RegistroPacientes')
+def admin_RegistroPacientes():
+    return render_template('admin/forms.html')
 
+@app.route('/admin/GestionarPacientes')
+def admin_GestionarPacientes():
+    # Establecer la conexión a la base de datos
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
 
+    # Ejecutar la consulta SQL
+    query = "SELECT u.*, d.score_final, d.estado_final FROM USUARIO u JOIN DIAGNOSTICO d ON u.id = d.id_usuario WHERE u.tipo = 'Paciente'"
+    cursor.execute(query)
+    usuario_list = cursor.fetchall()
 
+    # Cerrar el cursor y la conexión a la base de datos
+    cursor.close()
+    connection.close()
+    return render_template('admin/tables.html', usuario_list=usuario_list)
 
 
 #Authentication
@@ -691,7 +707,8 @@ from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5001)  # Cambia 5001 por otro puerto que esté libre
+
 
 
 
