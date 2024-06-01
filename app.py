@@ -716,7 +716,7 @@ from sklearn.metrics import precision_recall_curve, roc_curve, auc, f1_score
 
 
 if __name__ == "__main__":
-    app.run(port=5001)  # Cambia 5001 por otro puerto que esté libre
+    app.run() 
 
 
 
