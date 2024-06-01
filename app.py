@@ -74,9 +74,14 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = 'AppTransf/session_data'  # Ruta relativa a la carpeta 'AppTransf'.
 Session(app)
 
-@app.route('/admin/RegistroPacientes')
+
+
+
+@app.route('/registro-pacientes', methods=['GET', 'POST'])
 def admin_RegistroPacientes():
+    # Tu lógica aquí
     return render_template('admin/forms.html')
+
 
 @app.route('/admin/GestionarPacientes')
 def admin_GestionarPacientes():
@@ -93,6 +98,10 @@ def admin_GestionarPacientes():
     cursor.close()
     connection.close()
     return render_template('admin/tables.html', usuario_list=usuario_list)
+
+
+
+
 
 
 #Authentication
