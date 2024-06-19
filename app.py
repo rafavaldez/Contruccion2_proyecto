@@ -83,6 +83,14 @@ def admin_RegistroPacientes():
     return render_template('admin/forms.html')
 
 
+
+@app.route('/historial-anomalias', methods=['GET', 'POST'])
+def admin_historialanomalias():
+    # Tu lógica aquí
+    return render_template('admin/historial.html')
+
+
+
 @app.route('/admin/GestionarPacientes')
 def admin_GestionarPacientes():
     # Establecer la conexión a la base de datos
@@ -192,18 +200,29 @@ def upload_file():
             else:
                 return jsonify({'error': 'Formato de archivo no admitido'})
         except Exception as e:
-            return jsonify({'error': 'Error al cargar el archivo'})
+            return jsonify({'error': 'Error al cargar el archivo: {}'.format(str(e))})
 
         # Inserta los datos en MongoDB si es un DataFrame válido
         if not df.empty:
-            # Conecta con la base de datos MongoDB Atlas
+            # Convierte el DataFrame a JSON
+            data_json = df.to_json(orient='split')
             
-            # Inserta los datos en la colección 'documentos'
-            documentos.insert_many(df.to_dict(orient='records'))
+            # Inserta el JSON como texto en la colección 'documentos'
+            documento = {
+                'filename': file.filename,
+                'data_json': data_json,
+                'usuario':session["user_id"]
+            }
+            
+            # Conecta con la base de datos MongoDB Atlas
+            try:
+                documentos.insert_one(documento)
+            except Exception as e:
+                return jsonify({'error': 'Error al insertar en la base de datos: {}'.format(str(e))})
 
         # Devuelve los datos procesados en formato JSON
-        data_json = df.to_json(orient='split')
         return jsonify({'data': data_json})
+
 
 def login_is_required(function):
     def wrapper(*args, **kwargs):
@@ -519,6 +538,8 @@ def admin_ResultadosAnalisis():
             data = pd.read_csv(uploaded_filename) if uploaded_filename.endswith('.csv') else pd.read_excel(uploaded_filename)
         else:
             return jsonify({'error': 'Formato de archivo no admitido. Cargue un archivo CSV o Excel.'})
+
+        
 
         data.columns = [col.lower() for col in data.columns]  
         categorias_column = find_category_column(data)

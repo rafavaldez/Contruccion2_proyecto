@@ -17,6 +17,10 @@ class TestFileUpload(unittest.TestCase):
 
     @patch('app.documentos')  # Ajusta esta línea según la ubicación de 'documentos' en tu código
     def test_upload_file_successful(self, mock_documentos):
+        # Configura la sesión antes de la solicitud POST
+        with self.client.session_transaction() as session:
+            session['user_id'] = 'test_user_id'
+
         # Crea un archivo CSV en memoria
         data = b'col1,col2,col3\n1,2,3\n4,5,6'
         data_file = BytesIO(data)
@@ -67,3 +71,4 @@ class TestFileUpload(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
