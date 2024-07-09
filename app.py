@@ -86,8 +86,13 @@ def admin_RegistroPacientes():
 
 @app.route('/historial-anomalias', methods=['GET', 'POST'])
 def admin_historialanomalias():
-    # Tu lógica aquí
-    return render_template('admin/historial.html')
+    if 'user_id' in session:
+        user_documents = documentos.find({"usuario": session['user_id']})
+        return render_template('admin/historial.html', documents=user_documents)
+    return redirect(url_for('home'))
+
+
+
 
 
 
@@ -189,7 +194,7 @@ def upload_file():
         file.save(filename)
 
         # Guarda filename en la sesión
-        session['uploaded_filename'] = filename
+        
 
         # Intenta cargar el archivo CSV o Excel
         try:
@@ -202,25 +207,11 @@ def upload_file():
         except Exception as e:
             return jsonify({'error': 'Error al cargar el archivo: {}'.format(str(e))})
 
-        # Inserta los datos en MongoDB si es un DataFrame válido
-        if not df.empty:
-            # Convierte el DataFrame a JSON
-            data_json = df.to_json(orient='split')
-            
-            # Inserta el JSON como texto en la colección 'documentos'
-            documento = {
-                'filename': file.filename,
-                'data_json': data_json,
-                'usuario':session["user_id"]
-            }
-            
-            # Conecta con la base de datos MongoDB Atlas
-            try:
-                documentos.insert_one(documento)
-            except Exception as e:
-                return jsonify({'error': 'Error al insertar en la base de datos: {}'.format(str(e))})
+        data_json = df.to_json(orient='split')
 
         # Devuelve los datos procesados en formato JSON
+        session['uploaded_filename'] = data_json
+        session['uploaded_filename_name'] = file.filename
         return jsonify({'data': data_json})
 
 
@@ -248,11 +239,18 @@ def login_comun():
 
     user = usuarios.find_one({"dni": dni})
 
+
     if user:
         if user["contrasenaHash"] == password:  # Verifica si la contraseña es correcta
             session["user_id"] = str(user["_id"])
             print("Inicio de sesión exitoso")  # Imprime el mensaje de éxito
-            return redirect(url_for('admin_home'))
+            roles = user.get("roles", [])  # Obtener la lista de roles del usuario (o una lista vacía si no hay roles)
+            session["user_role"] = user.get("roles", []) 
+            
+            if "admin" in roles:
+                return redirect(url_for('admin_home'))
+            else:
+                return redirect(url_for('admin_RegistroPacientes'))
 
         else:
             print("Contraseña incorrecta")  # Imprime el mensaje de contraseña incorrecta
@@ -482,8 +480,27 @@ def admin_ResultadosAnalisis():
         return jsonify({'error': 'No se ha cargado ningún archivo'})
 
 '''
+@app.route("/admin/ResultadosInforme", methods=['POST'])
+def admin_ResultadosInforme():
+    try:
+        reportes = request.form.get('reporte')
+        
+        if reportes:
+            # Convertir la cadena JSON de vuelta a un array de arrays
+            reportes_array = json.loads(reportes.replace("'", '"'))  # Reemplazar comillas simples con comillas dobles
+            # Renderizar la plantilla informe.html y pasarle los reportes
+            return render_template("admin/informe.html", reportes=reportes_array)
+        else:
+            return jsonify({'error': 'No se recibieron datos de reporte'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 
+
+
+
+
+    
 
 
 
@@ -529,71 +546,101 @@ def find_name_column(data):
             return column
 
     return None
+    
+from datetime import datetime, timedelta
 
-@app.route("/admin/ResultadosAnalisis")
+
+@app.route("/admin/ResultadosAnalisis", methods=['GET', 'POST'])
 def admin_ResultadosAnalisis():
-    uploaded_filename = session.get('uploaded_filename')
-    if uploaded_filename is not None:
-        if uploaded_filename.endswith(('.csv', '.xls', '.xlsx')):
-            data = pd.read_csv(uploaded_filename) if uploaded_filename.endswith('.csv') else pd.read_excel(uploaded_filename)
-        else:
-            return jsonify({'error': 'Formato de archivo no admitido. Cargue un archivo CSV o Excel.'})
+    try:
+        uploaded_filename = session.get('uploaded_filename')
+        filename = request.form.get('filename')
+        id_datajson = request.form.get('id_json')
 
         
+        if request.form:
+            data_dict = json.loads(filename)
+            data_str=(filename)
+            print("Filename")
+            return render_template("admin/charts.html", filename=data_str, data_json=json.dumps(data_str), id_datajson=id_datajson)
+        else:
+            data_dict = json.loads(uploaded_filename)
+            data_str=(uploaded_filename)
+            utc_now = datetime.utcnow()
+            peru_now = utc_now - timedelta(hours=5)
+            current_time = peru_now.strftime('%Y-%m-%d %H:%M:%S')
 
-        data.columns = [col.lower() for col in data.columns]  
-        categorias_column = find_category_column(data)
-        marcas_column = find_brand_column(data)
-        precio_unitario_column = find_price_column(data)
-        nombre_column = find_name_column(data)  
-
-        if categorias_column and marcas_column and precio_unitario_column and nombre_column:
-            encoder = OneHotEncoder(drop='first', handle_unknown='ignore')
-            X_encoded = encoder.fit_transform(data[[categorias_column, marcas_column, nombre_column]])  
-
-            X_numeric = data[precio_unitario_column].values
-            X_final = np.column_stack((X_encoded.toarray(), X_numeric))
-
-            unique_categories = data[categorias_column].unique()
-            unique_brands = data[marcas_column].unique()
-            unique_names = data[nombre_column].unique()
             
-            thresholds = {}
 
-            for category in unique_categories:
+
+            data = pd.DataFrame(data=data_dict['data'], columns=data_dict['columns'])
+        
+            data.columns = [col.lower() for col in data.columns]
+            marca_column = 'marca'
+            precio_unitario_column = 'precio_unitario'
+            nombre_column = 'nombre'
+
+            if marca_column in data.columns and precio_unitario_column in data.columns and nombre_column in data.columns:
+                encoder = OneHotEncoder(drop='first', handle_unknown='ignore')
+                X_encoded = encoder.fit_transform(data[[marca_column, nombre_column]])
+                X_numeric = data[precio_unitario_column].values
+                X_final = np.column_stack((X_encoded.toarray(), X_numeric))
+
+                unique_brands = data[marca_column].unique()
+                unique_names = data[nombre_column].unique()
+
+                thresholds = {}
                 for brand in unique_brands:
                     for name in unique_names:
-                        subset = data[(data[categorias_column] == category) & (data[marcas_column] == brand) & (data[nombre_column] == name)]  
-                        mean = subset[precio_unitario_column].mean()
-                        std = subset[precio_unitario_column].std()
-                        upper_threshold = mean + 2 * std
-                        lower_threshold = mean - 2 * std
-                        thresholds[(category, brand, name)] = (upper_threshold, lower_threshold)
+                        subset = data[(data[marca_column] == brand) & (data[nombre_column] == name)]
+                        if not subset.empty:
+                            mean = subset[precio_unitario_column].mean()
+                            std = subset[precio_unitario_column].std()
+                            upper_threshold = mean + 2 * std
+                            lower_threshold = mean - 2 * std
+                            thresholds[(brand, name)] = (upper_threshold, lower_threshold)
 
-            data['anomalia_etiqueta'] = [1 if (row[precio_unitario_column] > thresholds[(row[categorias_column], row[marcas_column], row[nombre_column])][0] or row[precio_unitario_column] < thresholds[(row[categorias_column], row[marcas_column], row[nombre_column])][1]) else 0 for _, row in data.iterrows()]
+                data['anomalia_etiqueta'] = [
+                    1 if (row[precio_unitario_column] > thresholds[(row[marca_column], row[nombre_column])][0] or
+                        row[precio_unitario_column] < thresholds[(row[marca_column], row[nombre_column])][1]) else 0
+                    for _, row in data.iterrows()
+                ]
 
-            X = X_final
-            y = data['anomalia_etiqueta'].values
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+                X = X_final
+                y = data['anomalia_etiqueta'].values
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-            model = LogisticRegression()
-            model.fit(X_train, y_train)
+                model = LogisticRegression()
+                model.fit(X_train, y_train)
 
-            y_pred = model.predict(X_test)
+                y_pred = model.predict(X_test)
+                indices_anomalías = [i for i, anomalía in enumerate(y_pred) if anomalía == 1]
+                anomalías = data.iloc[indices_anomalías]
 
-            indices_anomalías = [i for i, anomalía in enumerate(y_pred) if anomalía == 1]
+                data.columns = [col.upper() if col != 'anomalia_etiqueta' else col for col in data.columns]
+                data_json = data.to_json(orient='split')
 
-            anomalías = data.iloc[indices_anomalías]
+            
+                documento = {
+                'filename': session["uploaded_filename_name"],
+                'data_json': data_json,
+                'usuario': session["user_id"],
+                'fecha_upload': current_time
+                }
 
-            data.columns = [col.upper() if col != 'anomalia_etiqueta' else col for col in data.columns]  
+                result = documentos.insert_one(documento)
+                id_datajson = str(result.inserted_id)  # Convertir ObjectId a string
+                print("upload")
 
-            data_json = data.to_json(orient='split')
+                return render_template("admin/charts.html", filename=data_str, data_json=json.dumps(data_json), anomalies=anomalías, id_datajson=id_datajson)
+            else:
+                return jsonify({'error': 'No se encontraron columnas relacionadas a MARCA, NOMBRE y PRECIO_UNITARIO'})
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
-            return render_template("admin/charts.html", filename=uploaded_filename, data_json=json.dumps(data_json), anomalies=anomalías)
-        else:
-            return jsonify({'error': 'No se encontraron columnas relacionadas a CATEGORIA, MARCA, NOMBRE y PRECIO'})
-    else:
-        return jsonify({'error': 'No se ha cargado ningún archivo'})
+    
+
+
 
 
 
@@ -614,10 +661,72 @@ def destino():
     # Accede a la fila seleccionada y al conjunto completo de datos
     selected_row = data.get('selectedRow', {})
     all_data = data.get('allData', {})
+    id_datajson = data.get('idDataJson', '')
     # Almacena los datos en la sesión del usuario
     session['selected_row'] = selected_row
     session['all_data'] = all_data
+    session['id_datajson'] = id_datajson
     return "Datos almacenados en la sesión"
+
+
+
+@app.route('/api/registrar_tramite', methods=['POST'])
+def registrar_tramite():
+    data = request.json
+
+    # Desglosar cada campo del JSON
+    prioridad_anomalia = data.get('prioridadAnomalia')
+    estado_anomalia = data.get('estadoAnomalia')
+    asunto = data.get('asunto')
+    contenido_solicitud = data.get('contenidoSolicitud')
+    id_datajson = data.get('idDataJson')
+    selected_row = data.get('selectedRow')
+    allData = data.get('allData')
+    allData_string = json.dumps(allData, ensure_ascii=False)
+
+    rowIndex = data.get('rowIndex')
+
+    # Aquí puedes procesar los datos, por ejemplo, almacenarlos en una base de datos
+    print("Prioridad de la Anomalía:", prioridad_anomalia)
+    print("Estado de la Anomalía:", estado_anomalia)
+    print("Asunto:", asunto)
+    print("Contenido de la Solicitud:", contenido_solicitud)
+    print("ID Data JSON:", id_datajson)
+    print("Selected Row:", selected_row)
+
+    # Buscar el documento en MongoDB utilizando id_datajson
+    documento = documentos.find_one({"_id": ObjectId(id_datajson)})
+
+    if documento:
+        # Reemplazar el data_json con allData
+        documentos.update_one(
+            {"_id": ObjectId(id_datajson)},
+            {"$set": {"data_json": allData_string}}
+        )
+        
+        # Crear el subdocumento reporte
+        nuevo_reporte = {
+            "index_anomalia": rowIndex,
+            "selected_row": selected_row,
+            "prioridad_anomalia": prioridad_anomalia,
+            "estado_anomalia": estado_anomalia,
+            "asunto": asunto,
+            "contenidoSolicitud": contenido_solicitud
+        }
+        
+        # Agregar el subdocumento reporte al documento
+        documentos.update_one(
+            {"_id": ObjectId(id_datajson)},
+            {"$push": {"reporte": nuevo_reporte}}
+        )
+
+        mensaje = "Trámite registrado y documento actualizado exitosamente"
+    else:
+        mensaje = "Documento no encontrado"
+
+    # Responder al cliente
+    return jsonify({"mensaje": mensaje})
+
 
 
 
@@ -630,6 +739,7 @@ def admin_destino():
     # Recupera los datos almacenados en la sesión
     selected_row = session.pop('selected_row', {})
     all_data = session.pop('all_data', {})
+    id_datajson = session.pop('id_datajson', '')
 
     marca_index = 13  # Ajusta el índice según la posición real de 'marca' en tu lista
     nombre_index = 12  # Ajusta el índice según la posición real de 'nombre' en tu lista
@@ -656,7 +766,7 @@ def admin_destino():
     price_prediction = model.predict(X)
 
     # Tu lógica para renderizar la plantilla
-    return render_template('admin/destino.html', selected_row=selected_row, all_data=all_data, prediction=price_prediction[0])
+    return render_template('admin/destino.html', selected_row=selected_row, all_data=all_data, prediction=price_prediction[0],id_datajson=id_datajson)
 
 
 
@@ -714,6 +824,15 @@ def admin_home():
     detalles_list = list(usuarios.find({}))  # Incluimos el campo _id
     detalles_list_json = json.dumps(detalles_list, default=json_util.default)
     return render_template('admin/index.html', detalles_list=detalles_list, detalles_list_json=detalles_list_json)
+
+
+@app.route('/logout')
+def admin_logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+
+
 
 
 

@@ -605,10 +605,14 @@ table.dataTable.no-footer {
             // Supongamos que data_json_str es la cadena JSON que obtienes desde el servidor
 var data_json_str = {{ data_json | safe }};
 
+var idDataJson = JSON.parse('{{ id_datajson|tojson }}');
+console.log("ID Data JSON:", idDataJson);
+
 try {
     // Intenta analizar la cadena JSON
     var data_json = JSON.parse(data_json_str);
     console.log(data_json);
+    
 
     var table = $('#myTable');
 

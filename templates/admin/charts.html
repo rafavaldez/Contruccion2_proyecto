@@ -557,6 +557,7 @@ table.dataTable.no-footer {
 <script>
     var data_json_str = {{ data_json | safe }};
     var dataJSON = JSON.parse(data_json_str);
+    console.log(dataJSON)
 
     // Calcular la cantidad total de anomalías
     var totalAnomalias = dataJSON.data.reduce(function (total, row) {
@@ -604,6 +605,8 @@ table.dataTable.no-footer {
             // Supongamos que data_json_str es la cadena JSON que obtienes desde el servidor
             // Supongamos que data_json_str es la cadena JSON que obtienes desde el servidor
 var data_json_str = {{ data_json | safe }};
+var idDataJson = JSON.parse('{{ id_datajson|tojson }}');
+    console.log(idDataJson)
 
 try {
     // Intenta analizar la cadena JSON
@@ -643,10 +646,17 @@ try {
     table.on('dblclick', 'tr', function () {
     var data = dataTable.row(this).data(); // Obtén los datos de la fila
 
+    var idDataJson = JSON.parse('{{ id_datajson|tojson }}');
+    console.log(idDataJson)
+
+    
+    
+
     // Agregar la fila seleccionada al conjunto completo de datos
     var combinedData = {
         selectedRow: data,
-        allData: data_json
+        allData: data_json,
+        idDataJson:idDataJson
     };
 
     // Realiza una solicitud POST al servidor para enviar los datos combinados
@@ -994,6 +1004,8 @@ try {
   // Obtener el JSON de los datos (asegúrate de que esto esté definido en tu HTML)
   var data_json_str = {{ data_json | safe }};
   var datosJSON = JSON.parse(data_json_str);
+
+ 
 
   // Crear un objeto para almacenar los conteos de anomalías por proveedor
   var anomaliasPorProveedor = {};

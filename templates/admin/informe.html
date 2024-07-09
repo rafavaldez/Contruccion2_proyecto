@@ -83,12 +83,9 @@ table.dataTable.no-footer {
           </a>
           <ul class="mt-6">
             <li class="relative px-6 py-3">
-              <span
-                class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
-                aria-hidden="true"
-              ></span>
+              
               <a
-                class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
+                class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
                 href="{{ url_for('admin_home') }}"
               >
                 <svg
@@ -111,9 +108,15 @@ table.dataTable.no-footer {
           </ul>
           <ul>
             <li class="relative px-6 py-3">
+              <span
+                class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                aria-hidden="true"
+              ></span>
               <a
-                class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+                
+                class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
                 href="{{ url_for('admin_RegistroPacientes') }}"
+                
               >
                 <svg
                   class="w-5 h-5"
@@ -137,6 +140,8 @@ table.dataTable.no-footer {
             
            
           </ul>
+
+          
         </div>
       </aside>
       <!-- Mobile sidebar -->
@@ -506,441 +511,135 @@ table.dataTable.no-footer {
             <h2
               class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200"
             >
-              Datos Seleccionados:
+              Historial Anomalias
             </h2>
-            
-            <div id="dataCards">
-              <!-- Aquí se agregarán las tarjetas de datos dinámicamente con JavaScript -->
-          </div>
-          
-          <script>
-              // Supongamos que selected_row y all_data son los objetos JSON que obtienes desde el servidor
-              var selectedRow = {{ selected_row | safe }};
-              var dataCardsDiv = document.getElementById('dataCards');
-          
-              // Supongamos que titles es la lista de títulos que quieres mostrar
-              var titles = [
-                  "ORDEN_COMPRA", "CATALOGO", "TIPO_COMPRA", "RUC_ENTIDAD", "ENTIDAD",
-                  "RUC_PROVEEDOR", "PROVEEDOR", "FECHA_COMPRA", "ESTADO_ORDEN",
-                  "DEPARTAMENTO", "PROVINCIA", "DISTRITO", "NOMBRE", "MARCA",
-                  "PRECIO_UNITARIO", "PRECIO_TOTAL", "anomalia_etiqueta"
-              ];
-          
-              // Crear tarjetas de datos dinámicamente
-              for (var i = 0; i < selectedRow.length; i++) {
-                  var card = document.createElement('div');
-                  card.className = 'data-card';
-                  card.innerHTML = '<strong>' + titles[i] + ':</strong> ' + selectedRow[i];
-                  dataCardsDiv.appendChild(card);
-              }
-          </script>
-            <BR>
-
-
-            
-
-            <!-- New Table -->
-            <h4
-              class="mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300"
-            >
-              PREDICION
-            </h4>
-            <p>Predicción: {{ prediction }}</p>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-
-<style>
-  /* Estilo personalizado para el botón */
-.custom-button {
-    background-color: #4CAF50; /* Verde */
-    border: none;
-    color: white;
-    padding: 10px 20px; /* Tamaño más pequeño */
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px; /* Tamaño de fuente más pequeño */
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 8px; /* Bordes redondeados */
-    width: 200px; /* Ancho del botón ajustado */
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.custom-button:hover {
-    background-color: #45a049; /* Verde más oscuro al pasar el ratón */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra */
-}
-
-.custom-button:active {
-    background-color: #3e8e41; /* Verde aún más oscuro al hacer clic */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) inset; /* Sombra interna al hacer clic */
-    transform: translateY(2px); /* Efecto de botón presionado */
-}
-
-
-</style>
-            <button id="openModalBtn" onclick="addAnomalia()" class="custom-button btn btn-primary">Agregar</button>
-
-            
-            <h2>ID Data JSON:</h2>
-    <p>{{ id_datajson }}</p>
-
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <script>
+            <div class="grid gap-6">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        .anomaly-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #ffffff;
+        }
+        .anomaly-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+        .anomaly-content {
+            font-size: 1rem;
+            color: #4b5563;
+        }
+        .anomaly-content span {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        .anomaly-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .anomaly-table th, .anomaly-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+        }
+        .anomaly-table th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        .selected-row-list {
+            list-style-type: disc;
+            font-size: 0.875rem; /* Reducir el tamaño de la fuente */
+            padding-left: 1rem; /* Espaciado a la izquierda */
+        }
+        .selected-row-list li {
+            font-weight: bold; /* Negrita */
+        }
+    </style>
               
-              
-              function addAnomalia() {
-                var idDataJson = "{{ id_datajson }}";
-                var selectedRow = {{ selected_row | safe }};
-                console.log(idDataJson)
-                  Swal.fire({
-                    
-                      title: "Registrar Anomalía",
-                      html: `
-                          <style>
-                              .swal2-popup {
-                                  width: 80% !important;
-                                  max-width: none !important;
-                              }
-                              .swal2-content {
-                                  display: flex;
-                                  flex-direction: column;
-                                  align-items: flex-start;
-                                  width: 100%;
-                              }
-                              .form-group {
-                                  width: 100%;
-                                  margin-bottom: 15px;
-                              }
-                              .form-group label {
-                                  font-weight: bold;
-                                  margin-bottom: 5px;
-                                  display: block;
-                              }
-                              .form-group input, .form-group select, .form-group textarea {
-                                  width: 100%;
-                                  padding: 8px;
-                                  border: 1px solid #ccc;
-                                  border-radius: 4px;
-                                  box-sizing: border-box;
-                              }
-                              .form-group textarea {
-                                  resize: vertical;
-                                  height: 100px;
-                              }
-                              .form-row {
-                                  display: flex;
-                                  flex-wrap: wrap;
-                                  justify-content: space-between;
-                              }
-                              .form-column {
-                                  flex: 1;
-                                  margin-right: 10px;
-                              }
-                              .form-column:last-child {
-                                  margin-right: 0;
-                              }
-                          </style>
-                          <div class="form-row">
-                              <div class="form-column">
-                                  <div class="form-group">
-                                      <label for="prioridadAnomalia">Prioridad de la Anomalía:</label>
-                                      <select id="prioridadAnomalia" required>
-                                        <option value="" disabled selected>Seleccione una opción</option>
-                                        <option value="baja">Baja</option>
-                                        <option value="media">Media</option>
-                                        <option value="alta">Alta</option>
-                                      </select>
-                                  </div>
-                              </div>
-                              <div class="form-column">
-                                  <div class="form-group">
-                                      <label for="estadoAnomalia">Estado de Anomalia:</label>
-                                      <select id="estadoAnomalia" disabled>
-                                        <option value="pendiente" selected>Pendiente</option>
-                                        <option value="en_revision">En Revisión</option>
-                                        <option value="resuelta">Resuelta</option>
-                                      </select>
-                                  </div>
-                              </div>
-                          </div>
-                          <div class="form-group">
-                              <label for="asunto">Asunto (*):</label>
-                              <input id="asunto" type="text" placeholder="Asunto del Trámite" required>
-                          </div>
-                          <div class="form-group">
-                              <label for="contenidoSolicitud">Respetuosamente expongo: (*):</label>
-                              <textarea id="contenidoSolicitud" placeholder="Contenido de solicitud"></textarea>
-                          </div>
-                      `,
-                      showCancelButton: true,
-                      confirmButtonText: "Registrar",
-                      cancelButtonText: "Cancelar",
-                      preConfirm: () => {
-                        
-                          const prioridadAnomalia = document.getElementById("prioridadAnomalia").value;
-                          const estadoAnomalia = document.getElementById("estadoAnomalia").value;
-                          const asunto = document.getElementById("asunto").value;
-                          const contenidoSolicitud = document.getElementById("contenidoSolicitud").value;
-
-                          var selectedRow = {{ selected_row | safe }};
-                          var allData = {{ all_data | safe }};
-
-                          function arraysEqual(arr1, arr2) {
-                            if (arr1.length !== arr2.length) return false;
-                            for (let i = 0; i < arr1.length; i++) {
-                                if (String(arr1[i]).trim() !== String(arr2[i]).trim()) return false;
-                            }
-                            return true;
-                          }
-
-                          // Buscar el índice de la fila seleccionada en allData.data
-                          let rowIndex = -1;
-                          for (let i = 0; i < allData.data.length; i++) {
-                              if (arraysEqual(allData.data[i], selectedRow)) {
-                                  rowIndex = i;
-                                  break;
-                              }
-                          }
-
-                          // Mostrar el índice de la fila en la consola
-                          if (rowIndex !== -1) {
-                              console.log("Row Index:", rowIndex);
-
-                              // Modificar la fila en el índice encontrado
-                              allData.data[rowIndex][16] = 9;
-
-                              // Mostrar el objeto allData modificado en la consola
-                              console.log("Modified All Data:", allData);
-                          } else {
-                              console.error("Selected Row not found in All Data.");
-                          }
-            
-                          return {
-                              prioridadAnomalia,
-                              estadoAnomalia,
-                              asunto,
-                              contenidoSolicitud,
-                              idDataJson,
-                              selectedRow,
-                              allData,
-                              rowIndex
-                          };
-                      },
-                  }).then((result) => {
-                      if (result.isConfirmed) {
-                          const tramiteData = result.value;
-                          fetch("/api/registrar_tramite", {
-                              method: "POST",
-                              headers: {
-                                  "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify(tramiteData),
-                          })
-                          .then((response) => response.json())
-                          .then((data) => {
-                              Swal.fire("¡Registro exitoso!", data.mensaje, "success");
-                              // Actualiza la tabla o realiza las acciones necesarias con la respuesta
-                          })
-                          .catch((error) => {
-                              Swal.fire("¡Error!", error.message, "error");
-                          });
-                      }
-                  });
-              }
-            </script>
-
-
-            
-
-
-
-
-
-
-
-              
-            <style>
-                #myTable2 th,
-                #myTable2 td {
-                    font-size: 12px;
-                    min-width: 100px;
-                }
-            
-                .anomalia-cero td {
-                    background-color: green; /* Color verde para anomalia_etiqueta igual a 0 */
-                }
-            
-                .anomalia-uno td {
-                    background-color: red; /* Color rojo para anomalia_etiqueta igual a 1 */
-                }
-            </style>
-            
-            <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-                Tabla de Anomalias
-            </h2>
-            <div class="results w-full overflow-hidden rounded-lg shadow-xs w-full overflow-x-auto dataTables_wrapper no-footer" id="myTable_wrapper">
-                <!-- Aquí se mostrará la tabla -->
-                <div class="w-full overflow-hidden rounded-lg shadow-xs">
-                    <div class="w-full overflow-x-auto">
-                        <table class="table" id="myTable2" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <!-- Cabeceras de columna se agregarán dinámicamente aquí -->
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Agrega las filas y celdas aquí -->
-                            </tbody>
+                <h1>Informe de Anomalías</h1>
+                <div>
+                    {% for reporte in reportes %}
+                    <div class="anomaly-card">
+                        <div class="anomaly-header">{{ reporte.asunto }}</div>
+                        <table class="anomaly-table">
+                            <tr>
+                                <th>Índice de Anomalía</th>
+                                <td>{{ reporte.index_anomalia }}</td>
+                            </tr>
+                            <tr>
+                                <th>Fila Seleccionada</th>
+                                <td><ul class="selected-row-list">
+                                    {% for item in reporte.selected_row %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul></td>
+                            </tr>
+                            <tr>
+                                <th>Prioridad de Anomalía</th>
+                                <td>{{ reporte.prioridad_anomalia }}</td>
+                            </tr>
+                            <tr>
+                                <th>Estado de Anomalía</th>
+                                <td><select name="estado_anomalia_{{ loop.index }}" class="border border-gray-300 rounded px-2 py-1">
+                                    <option value="pendiente" {% if reporte.estado_anomalia == "pendiente" %}selected{% endif %}>pendiente</option>
+                                    <option value="resuelto" {% if reporte.estado_anomalia == "resuelto" %}selected{% endif %}>resuelto</option>
+                                    <option value="en_progreso" {% if reporte.estado_anomalia == "en_progreso" %}selected{% endif %}>en progreso</option>
+                                </select></td>
+                            </tr>
+                            <tr>
+                                <th>Contenido de Solicitud</th>
+                                <td>{{ reporte.contenidoSolicitud }}</td>
+                            </tr>
+                            <tr>
+                                <th>Anomalia</th>
+                                <td><select name="estado_anomalia_{{ loop.index }}" class="border border-gray-300 rounded px-2 py-1">
+                                    <option value="SI" {% if reporte.estado_anomalia == "SI" %}selected{% endif %}>SI</option>
+                                    <option value="NO" {% if reporte.estado_anomalia == "NO" %}selected{% endif %}>NO</option>
+                                </select></td>
+                            </tr>
                         </table>
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Guardar
+                            </button>
+                        </div>
                     </div>
+                    {% endfor %}
+                    
                 </div>
-            </div>
-            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
-<!-- Resto del HTML ... -->
-
-<!-- Agrega un contenedor div para el gráfico -->
-<div id="scatterPlot" style="width: 100%; height: 400px;"></div>
-
-
-<script>
-    // Supongamos que selected_row y all_data son los objetos JSON que obtienes desde el servidor
-    // Supongamos que selected_row y all_data son los objetos JSON que obtienes desde el servidor
-var selectedRow = {{ selected_row | safe }};
-var allData = {{ all_data | safe }};
-
-try {
-  console.log("Selected Row:", selectedRow);
-        console.log("All Data:", allData);
-
-        // Función para comparar dos arrays
-        
-
-
-
-    var table = $('#myTable2');
-
-    // Limpiar la tabla antes de agregar filas
-    table.find('thead tr').empty();
-    table.find('tbody').empty();
-
-    // Agregar las cabeceras de columna basadas en las claves del objeto "columns"
-    var columns = allData.columns;
-    for (var i = 0; i < columns.length; i++) {
-        // Omitir la columna 'anomalia_etiqueta'
-        if (columns[i] !== 'anomalia_etiqueta') {
-            table.find('thead tr').append('<th>' + columns[i] + '</th>');
-        }
-    }
-
-    // Filtrar las filas basadas en la categoría y marca seleccionadas
-    var filteredRows = allData.data.filter(function (rowData) {
-        return (
-            rowData[13] === selectedRow[13] ||  // Ajusta el índice según la estructura real de tus datos
-            rowData[14] === selectedRow[14]  // Ajusta el índice según la estructura real de tus datos
-        );
-    });
-
-    // Agregar filas y celdas basadas en los datos JSON filtrados
-    for (var i = 0; i < filteredRows.length; i++) {
-        var rowHtml = '<tr class="';
-        // Añadir clase CSS según el valor de anomalia_etiqueta
-        rowHtml += filteredRows[i][16] === 0 ? "anomalia-cero" : "anomalia-uno";
-        rowHtml += '">';
-        for (var j = 0; j < filteredRows[i].length; j++) {
-            // Omitir la columna 'anomalia_etiqueta'
-            if (j !== 16) {
-                rowHtml += '<td>' + filteredRows[i][j] + '</td>';
-            }
-        }
-        rowHtml += '</tr>';
-        table.find('tbody').append(rowHtml);
-    }
-
-    // Inicializar la tabla DataTable después de agregar las filas
-    var dataTable = table.DataTable({
-        select: true,
-    });
-    var indexAndPrecioUnitarioData = filteredRows.map(function (rowData, index) {
-        return {
-            index: index + 1, // Utiliza el índice actual + 1 como valor de "index"
-            precio_unitario: rowData[14], // Asumiendo que el precio_unitario está en la posición [14]
-        };
-    });
-
-    // Muestra los datos en la consola
-    console.log(indexAndPrecioUnitarioData);
-    // Configura los datos para el gráfico de puntos
-    var scatterData = {
-    x: indexAndPrecioUnitarioData.map(function (data) {
-        return data.index;
-    }),
-    y: indexAndPrecioUnitarioData.map(function (data) {
-        return data.precio_unitario;
-    }),
-    mode: 'markers+lines', // Cambiado a 'markers+lines'
-    type: 'scatter'
-};
-
-        // Configura el diseño del gráfico de dispersión
-        var scatterLayout = {
-            title: 'Precio Unitario vs Índice',
-            xaxis: {
-                title: 'Índice'
-            },
-            yaxis: {
-                title: 'Precio Unitario'
-            },
-            margin: {
-                l: 50,
-                r: 50,
-                b: 50,
-                t: 50
-            }
-        };
-
-        // Crea el gráfico de dispersión
-        Plotly.newPlot('scatterPlot', [scatterData], scatterLayout);
-
-    } catch (error) {
-        console.error("Error al procesar los datos:", error);
-    }
-</script>
             
+                <script>
+                    // Obtener los datos del reporte desde una variable de contexto de Jinja2
+                    const reportes = {{ reportes | tojson }};
+                    // Mostrar los datos en la consola
+                    console.log(reportes);
+                </script>
+          </div>
             
+          </div>
             
-            
-            
-            
-        
-          
-            
-
 
 
             
 
-        
-            <!-- Resultados de la Carga de Archivos -->
-            
             
 
            
-            
-
+        
            
-            
-            
 
             
 
-
+            
 
 
             
-            </div>
           </div>
         </main>
       </div>
